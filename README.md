@@ -1,5 +1,3 @@
-A training program for medical students on evaluating clinical evidence funded by the National Health Insurance Service in Korea
-
 ### Capstone Title: Meta-analysis of the Effect of Orlistat on The Body Mass Index in Obese Subjects
 
 ### Overview
