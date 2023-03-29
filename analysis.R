@@ -85,7 +85,6 @@ bmi.m2 <- rma(yi, vi,
 bmi.m2
 
 regplot(bmi.m2, mod = 2)
-regplot(bmi.m2, mod = 3)
 
 # remove the two studies with dose 60
 dat3 <- dat2[dat2$dose == '120',]
