@@ -4,7 +4,7 @@ library(metafor)
 library(tidyverse)
 
 # load the dataset ----
-dat <- read_excel('orlistat_bmi_extractions.xlsx', sheet = 1)
+dat <- read_excel('orlistat_bmi_extractions_fix.xlsx', sheet = 1)
 
 # explore the main effects ----
 # how many studies?
@@ -67,6 +67,26 @@ bmi.m1
 
 forest(bmi.m1)
 
+# adding much of patients in each study
+dat2$SampleSize <- dat2$n1i + dat2$n2i
+
+# Fit model
+bmi.m1 <- rma(yi, vi, data = dat2)
+
+# Generate with much of samples
+forest(bmi.m1,
+       xlab = "Reduction in BMI (MD)",
+       slab = paste(dat2$author, dat2$year, sep = ", "),
+       ilab = dat2$SampleSize,
+       ilab.xpos = -3,
+       cex = 0.8,
+       col = "black",
+       pch = 15,
+       col.diamond = "black",
+       col.diamond.lines = "black",
+       refline = 0,
+       digits = 2)
+
 # png(filename = 'figures/forest.png', width = 7, height = 6, units = 'in', res = 300)
 # par(mar = c(4.5,4,0,2))
 # forest(bmi.m1,
@@ -114,7 +134,7 @@ regplot(bmi.m3, mod = 4)
 #            xlim = c(.5,2.5),
 #            xlab = 'Dose (mg/day)',
 #            ylab = 'Reduction in BMI',
-#            main = 'Estimate = .5, P = .9')
+#            main = 'Estimate = .5, P = .9') <- i change based on data from summary bmi.m2 results
 # 
 # dose.ave <- aggregate(dat2$yi, by = list(dose = dat2$dose), mean)
 # dose.sd <- aggregate(dat2$yi, by = list(dose = dat2$dose), sd)
@@ -135,7 +155,7 @@ regplot(bmi.m3, mod = 4)
 #      lwd = 2,
 #      xlab = 'Duration (month)',
 #      ylab = 'Reduction in BMI',
-#      main = 'Estimate = .13, P = .01')
+#      main = 'Estimate = .13, P = .01') <- i change based on data from summary bmi.m3 results
 # bmi.m3
 # abline(bmi.m3$b[1], bmi.m3$b[2],
 #        lty = 2,
@@ -160,7 +180,7 @@ regplot(bmi.m3, mod = 4)
 #            xlim = c(.5,2.5),
 #            xlab = 'Age Group',
 #            ylab = 'Reduction in BMI',
-#            main = 'Estimate = .3, P = .5')
+#            main = 'Estimate = .3, P = .5') <- i change the value based on data from summary bmi.m3 results
 # bmi.m3
 # age.ave <- aggregate(dat3$yi, by = list(age.ave = dat3$age), mean)
 # age.sd <- aggregate(dat3$yi, by = list(age = dat3$age), sd)
@@ -188,7 +208,7 @@ regplot(bmi.m3, mod = 4)
 #            xlim = c(.5,2.5),
 #            xlab = 'Co-morbidities',
 #            ylab = 'Reduction in BMI',
-#            main = 'Estimate = -1.02, P = .03')
+#            main = 'Estimate = -1.02, P = .03') <- i change the value based on data from summary bmi.m3 results
 # 
 # comorbid.ave <- aggregate(dat3$yi, by = list(comorbid = dat3$age), mean)
 # comorbid.sd <- aggregate(dat3$yi, by = list(comorbid = dat3$age), sd)
@@ -257,3 +277,58 @@ plot(inf.m3$inf$tau2.del)
 # mtext('B', at = -4, line = 1.2, adj = 1)
 # 
 # dev.off()
+
+# for BMI.m4 data
+dat2$exercise <- as.factor(dat2$exercise)
+dat2$counseling <- as.factor(dat2$counseling)
+dat2$diet <- as.factor(dat2$diet)
+
+# ME ith new moderator
+bmi.m4 <- rma(yi, vi,
+              data = dat2,
+              mods = ~ exercise + counseling + diet)
+
+# Print results
+summary(bmi.m4)
+
+# Make exercise as a factor
+dat2$exercise <- as.factor(dat2$exercise)
+xe <- c('Without', 'With')[dat2$exercise]
+stripchart(yi ~ factor(exercise, labels = c('Without', 'With')),
+           data = dat2,
+           vertical = TRUE,
+           method = 'jitter',
+           jitter = 0.2,
+           pch = 1,
+           cex = dat2$vi + 1,
+           lwd = 2,
+           xlab = 'Exercise',
+           ylab = 'Reduction in BMI',
+           main = 'Estimate = 0.87, P = 0.05') <- i change the value based on data from summary bmi.m4 results
+
+# Added average line
+ex.ave <- aggregate(dat2$yi, by = list(exercise = dat2$exercise), mean)
+ex.sd  <- aggregate(dat2$yi, by = list(exercise = dat2$exercise), sd)
+
+points(1:2, ex.ave$x, pch = 19, col = 'red')
+segments(1:2, ex.ave$x - ex.sd$x, 1:2, ex.ave$x + ex.sd$x, col = 'red', lwd = 1.5)
+
+
+dat2$diet <- as.factor(dat2$diet)
+stripchart(dat2$yi ~ dat2$diet,
+           vertical = TRUE,
+           method = 'jitter',
+           pch = 1,
+           cex = dat2$vi + 1,
+           lwd = 2,
+           xlab = 'Diet Type',
+           ylab = 'Reduction in BMI',
+           main = 'Estimate diet reduced = 0.43, P = 0.36') <- i change the value based on data from summary bmi.m4 results
+
+diet.ave <- aggregate(dat2$yi, by = list(diet = dat2$diet), mean)
+diet.sd  <- aggregate(dat2$yi, by = list(diet = dat2$diet), sd)
+
+points(1:nrow(diet.ave), diet.ave$x, pch = 19, col = 'red')
+segments(1:nrow(diet.ave), diet.ave$x - diet.sd$x,
+         1:nrow(diet.ave), diet.ave$x + diet.sd$x,
+         col = 'red', lwd = 1.5)
