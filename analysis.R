@@ -280,13 +280,12 @@ plot(inf.m3$inf$tau2.del)
 
 # for BMI.m4 data
 dat2$exercise <- as.factor(dat2$exercise)
-dat2$counseling <- as.factor(dat2$counseling)
 dat2$diet <- as.factor(dat2$diet)
 
 # ME ith new moderator
 bmi.m4 <- rma(yi, vi,
               data = dat2,
-              mods = ~ exercise + counseling + diet)
+              mods = ~ exercise + diet)
 
 # Print results
 summary(bmi.m4)
